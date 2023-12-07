@@ -1,0 +1,19 @@
+#home-div{
+    width: 30vw;
+    height: 50vh;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+#room-input{
+    width:75%;
+}
+
+@media (min-width:1px) and (max-width:1000px) {
+    #home-div{
+        width: 90vw;
+        height: 50vh;
+    }
+    #room-input{
+        width:90%;
+    }
+}

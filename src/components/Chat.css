@@ -1,0 +1,29 @@
+#chat-div{
+    width: 40vw;
+    height: 60vh;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+#chat-div div:first-child{
+    width:32%;
+}
+
+#chat-div div:last-child{
+    width:68%;
+}
+
+@media (min-width:200px) and (max-width:1000px) {
+    #chat-div{
+        width: 90vw;
+        height: 50vh;
+    }
+}
+
+@keyframes autoscroll {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}
