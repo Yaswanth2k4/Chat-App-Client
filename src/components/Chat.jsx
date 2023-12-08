@@ -13,9 +13,9 @@ function Chat(props)
     const [users,setUsers]=useState([]);
 
     useEffect(()=>{
-        axios.get(`${process.env.REACT_APP_API}/chats/getchats/${props.uid}`)
-        .then(res=>res.data)
-        .then(data=>setChats(data));
+        // axios.get(`${process.env.REACT_APP_API}/chats/getchats/${props.uid}`)
+        // .then(res=>res.data)
+        // .then(data=>setChats(data));
 
         socket.on("connect",()=>{
             console.log(`Connected with socket id ${socket.id}`)
@@ -100,7 +100,7 @@ function Chat(props)
 
                 <div name="right" className="container position-relative border my-2 border-start-0 border-top-0 p-0" style={{backgroundColor:"#f2f2f2"}}>
                     <div className="container text-center pt-2 pb-1 bg-primary w-100">
-                        <p className="h5 text-white">Room Id :{props.roomId}</p>
+                        <p className="h5 text-white">Room Id : {props.roomId}</p>
                     </div>
                     <div className="container d-flex flex-column border-0 w-100 pt-2" style={{height:"82%",overflowY:"scroll",backgroundColor:"#f2f2f2"}}>
                         {
@@ -118,7 +118,7 @@ function Chat(props)
                                             <p className="h6 fw-normal text-white">{chat.message}</p>
                                         </div>
                                 )
-                                else return (
+                                else if(chat.message!==undefined) return (
                                     <div className="d-flex flex-column container p-0 mb-2 align-items-start justify-content-between w-100">
                                         <div className="receive p-1 px-2 pb-0 border bg-white w-auto" style={{maxWidth:"45%"}}>
                                             <p className="h6 fw-normal text-black">{chat.message}</p>
