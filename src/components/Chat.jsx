@@ -10,6 +10,7 @@ function Chat(props)
 {
     const [input,setInput]=useState("");
     const [chats,setChats]=useState([{}]);
+    const [users,setUsers]=useState([]);
 
     useEffect(()=>{
         axios.get(`${process.env.REACT_APP_API}/chats/getchats/${props.uid}`)
@@ -19,15 +20,22 @@ function Chat(props)
         socket.on("connect",()=>{
             console.log(`Connected with socket id ${socket.id}`)
             socket.emit("join-room",props.roomId,props.name,(message)=>{
-                displayMessage(message);
+                displayMessage(message,true);
                 console.log(message);
             });
             socket.on("server-message",(message)=>{
-                displayMessage(message);
+                displayMessage(message,false);
                 console.log(message)
             });
             socket.on("server-joined",(name)=>{
-                displayMessage(`${name} joined the room`);
+                displayMessage(`${name} joined the room`,true);
+                setUsers(prevUsers=>[...prevUsers,name]);
+            })
+            socket.on("disconnect",()=>{
+                socket.emit("leave-room",props.roomId,props.name);
+            })
+            socket.on("server-left",(message)=>{
+                displayMessage(message,true);
             })
         })
 
@@ -36,11 +44,11 @@ function Chat(props)
         }
     },[])
 
-    function displayMessage(message)
+    function displayMessage(message,isJoined)
     {
         const date=new Date();
         const time=date.getHours().toString().concat(":",String(date.getMinutes()).padStart(2,"0"))
-        setChats(prevChats=>[...prevChats,{message:message,client:false,time:time}])
+        setChats(prevChats=>[...prevChats,{message:message,client:false,time:time,isJoined:isJoined}])
     }
 
     function sendMessage()
@@ -50,7 +58,7 @@ function Chat(props)
 
         const date=new Date();
         const time=date.getHours().toString().concat(":",String(date.getMinutes()).padStart(2,"0"))
-        setChats(prevChats=>[...prevChats,{message:text,client:true,time:time}])
+        setChats(prevChats=>[...prevChats,{message:text,client:true,time:time,isJoined:false}])
 
         socket.emit("client-message",text,props.roomId);
 
@@ -81,6 +89,13 @@ function Chat(props)
                     <div className="container text-center border-bottom pt-2 pb-0 w-100">
                         <p className="fs-6 text-success">(You) {props.name}</p>
                     </div>
+                    {
+                            users.map(user=>{
+                                return  <div className="container text-center border-bottom pt-2 pb-0 w-100">
+                                            <p className="fs-6 text-success">{user}</p>
+                                        </div>
+                            })
+                        }
                 </div>
 
                 <div name="right" className="container position-relative border my-2 border-start-0 border-top-0 p-0" style={{backgroundColor:"#f2f2f2"}}>
@@ -97,6 +112,11 @@ function Chat(props)
                                         </div>
                                         <p style={{fontSize:"12px"}}>{chat.time}</p>
                                     </div>
+                                )
+                                else if(chat.isJoined) return(
+                                        <div className="rounded container bg-success p-1 px-2 pb-0 mb-2 w-auto">
+                                            <p className="h6 fw-normal text-white">{chat.message}</p>
+                                        </div>
                                 )
                                 else return (
                                     <div className="d-flex flex-column container p-0 mb-2 align-items-start justify-content-between w-100">
