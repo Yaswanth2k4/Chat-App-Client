@@ -9,40 +9,52 @@ import {socket} from "../socket"
 function Chat(props)
 {
     const [input,setInput]=useState("");
-    const [chats,setChats]=useState([]);
+    const [chats,setChats]=useState([{}]);
 
     useEffect(()=>{
         axios.get(`${process.env.REACT_APP_API}/chats/getchats/${props.uid}`)
         .then(res=>res.data)
         .then(data=>setChats(data));
+
+        socket.on("connect",()=>{
+            console.log(`Connected with socket id ${socket.id}`)
+            socket.emit("join-room",props.roomId,props.name,(message)=>{
+                displayMessage(message);
+                console.log(message);
+            });
+            socket.on("server-message",(message)=>{
+                displayMessage(message);
+                console.log(message)
+            });
+            socket.on("server-joined",(name)=>{
+                displayMessage(`${name} joined the room`);
+            })
+        })
+
+        return ()=>{
+            socket.off("connect");
+        }
     },[])
 
     function displayMessage(message)
     {
-        setChats(prevChats=>[...prevChats,message])
+        const date=new Date();
+        const time=date.getHours().toString().concat(":",String(date.getMinutes()).padStart(2,"0"))
+        setChats(prevChats=>[...prevChats,{message:message,client:false,time:time}])
     }
-
-    socket.on("connect",()=>{
-        console.log(`Connected with socket id ${socket.id}`)
-        socket.emit("join-room",props.roomId,(message)=>{
-            displayMessage(message);
-            console.log(message);
-        })
-        socket.on("server-message",(message)=>{
-            displayMessage(message);
-            console.log(message)
-        });
-    })
 
     function sendMessage()
     {
         const text=input.text;
         setInput({text:""});
-        setChats(prevChats=>[...prevChats,text])
+
+        const date=new Date();
+        const time=date.getHours().toString().concat(":",String(date.getMinutes()).padStart(2,"0"))
+        setChats(prevChats=>[...prevChats,{message:text,client:true,time:time}])
 
         socket.emit("client-message",text,props.roomId);
 
-        axios.post(`${process.env.REACT_APP_API}/chats/addchat/${props.uid}`,{chat:text})
+        axios.post(`${process.env.REACT_APP_API}/chats/addchat/${props.uid}`,{message:text,client:true})
         .then(res=>res.data)
     }
 
@@ -71,14 +83,29 @@ function Chat(props)
                     </div>
                 </div>
 
-                <div name="right" className="container position-relative border my-2 bg-light border-start-0 border-top-0 p-0">
+                <div name="right" className="container position-relative border my-2 border-start-0 border-top-0 p-0" style={{backgroundColor:"#f2f2f2"}}>
                     <div className="container text-center pt-2 pb-1 bg-primary w-100">
                         <p className="h5 text-white">Room Id :{props.roomId}</p>
                     </div>
-                    <div className="container d-flex flex-column border-0 w-100" style={{height:"82%",overflowY:"scroll"}}>
+                    <div className="container d-flex flex-column border-0 w-100 pt-2" style={{height:"82%",overflowY:"scroll",backgroundColor:"#f2f2f2"}}>
                         {
                             chats.map((chat)=>{
-                                return <p>{chat}</p>
+                                if(chat.client) return(
+                                    <div className="d-flex flex-column container p-0 mb-2 align-items-end justify-content-between w-100">
+                                        <div className="sent p-1 px-2 pb-0 bg-primary w-auto" style={{maxWidth:"45%"}}>
+                                            <p className="h6 fw-normal text-white">{chat.message}</p>
+                                        </div>
+                                        <p style={{fontSize:"12px"}}>{chat.time}</p>
+                                    </div>
+                                )
+                                else return (
+                                    <div className="d-flex flex-column container p-0 mb-2 align-items-start justify-content-between w-100">
+                                        <div className="receive p-1 px-2 pb-0 border bg-white w-auto" style={{maxWidth:"45%"}}>
+                                            <p className="h6 fw-normal text-black">{chat.message}</p>
+                                        </div>
+                                        <p style={{fontSize:"12px"}}>{chat.time}</p>
+                                    </div>
+                                )
                             })
                         }
                     </div>

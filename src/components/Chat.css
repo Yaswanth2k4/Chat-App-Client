@@ -1,5 +1,5 @@
 #chat-div{
-    width: 40vw;
+    width: 50vw;
     height: 60vh;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
@@ -10,6 +10,16 @@
 
 #chat-div div:last-child{
     width:68%;
+}
+
+.sent{
+    border-radius: 7px;
+    border-top-right-radius: 0px;
+}
+
+.receive{
+    border-radius: 7px;
+    border-top-left-radius: 0px;
 }
 
 @media (min-width:200px) and (max-width:1000px) {

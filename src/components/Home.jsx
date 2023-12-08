@@ -17,8 +17,8 @@ function Home()
         setRoomId({
             val:id
         });
-        socket.connect();
         setJoined(true);
+        socket.connect();
     }
 
     function handleChange(e)
@@ -32,8 +32,8 @@ function Home()
     function handleJoinRoom()
     {
         setMessage(roomId.val);
-        socket.connect();
         setJoined(true);
+        socket.connect();
     }
 
     return !joinedRoom?(
