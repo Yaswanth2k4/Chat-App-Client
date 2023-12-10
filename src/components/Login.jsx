@@ -2,7 +2,6 @@ import React,{useState} from "react"
 import "./Login.css"
 import axios from "axios";
 import Header from "./Header";
-import {doLogin,isLoggedIn} from "../auth/index.js";
 import Home from "./Home.jsx";
 
 function Login()
@@ -17,7 +16,10 @@ function Login()
         Email:"",
         Password:""
     })
-
+    const [visibility,setVisible]=useState("hidden")
+    const [name,setName]=useState("");
+    const [uid,setUid]=useState("");
+    const [isLoggedIn,setLoggedIn]=useState(false);
     function handleChange(e)
     {
         setMessage("")
@@ -49,11 +51,21 @@ function Login()
     {
         if(e.target.name==="Login" && input.Email!=="" && input.Password!=="")
         {
+            setVisible("visible")
             axios.post(`${process.env.REACT_APP_API}/login`,{email:input.Email,password:input.Password})
             .then(res=>res.data).then(data=>{
+                setVisible("hidden")
                 setMessage(data.message)
                 setSuccess(true)
-                doLogin(data.id,data.name);
+                setName(data.name);
+                setUid(data.id)
+                setLoggedIn(true);
+                setInput({
+                    Name:"",
+                    Email:"",
+                    Password:""
+                })
+                setMessage("")
             })
             .catch(function(err){
                 setMessage(err.response.data.message)
@@ -75,10 +87,18 @@ function Login()
             })
         }
     }
-    return !isLoggedIn()?(
-    <div>
+
+    function logout()
+    {
+        setLoggedIn(false)
+    }
+
+    return !isLoggedIn?(
+    <div className="d-flex flex-column align-items-center">
         <Header></Header>
-        <div id="main-div" className="container rounded rounded-5 d-flex flex-column text-center bg-white">
+        <div className="spinner-border text-primary" style={{visibility:visibility}}>
+        </div>
+        <div id="main-div" className="container rounded rounded-5 d-flex flex-column mt-5 text-center bg-white">
             <h4 className="h4 mt-4">{submitBtn}</h4>
             <div className="border-0 btn-group mx-5 mt-3 mb-4" role="group">
                 <button type="button" className={isLogin?"btn btn-primary text-center active py-2":"btn btn-primary text-center py-2"} onClick={loginClick}>Login</button>
@@ -93,7 +113,11 @@ function Login()
             {isLogin && <button className="btn border-0 w-50 align-self-center" onClick={signupClick}>New User? <span className="text-primary">Signup</span></button>}
             <p className={isSuccess?"text-success align-self-center":"text-danger align-self-center"}>{message}</p>
         </div>
-    </div>):<Home/>
+    </div>):<Home 
+                logout={logout}
+                name={name}
+                uid={uid}
+            />
 }
 
 export default Login;

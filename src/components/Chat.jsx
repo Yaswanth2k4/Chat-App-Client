@@ -7,7 +7,6 @@ import { MdContentCopy } from "react-icons/md";
 import {IconButton} from "rsuite"
 import axios from "axios";
 import {socket} from "../socket"
-import Spinner from "./Spinner";
 
 function Chat(props)
 {
@@ -16,22 +15,18 @@ function Chat(props)
     const [users,setUsers]=useState([]);
 
     useEffect(()=>{
-        // axios.get(`${process.env.REACT_APP_API}/chats/getchats/${props.uid}`)
-        // .then(res=>res.data)
-        // .then(data=>setChats(data));
-
         socket.on("connect",()=>{
             console.log(`Connected with socket id ${socket.id}`)
             socket.emit("join-room",props.roomId,props.name,props.uid,(message)=>{
-                displayMessage(message,"",true);
+                displayMessage(message,"",true,false);
                 console.log(message);
             });
             socket.on("server-message",(message,name)=>{
-                displayMessage(message,name,false);
+                displayMessage(message,name,false,false);
                 console.log(message)
             });
-            socket.on("server-joined",(users,name)=>{
-                displayMessage(`${name} joined the room`,"",true);
+            socket.on("server-joined",(message,users)=>{
+                displayMessage(message,"",true,false);
                 users=users.filter(user=>user.uid!==props.uid)
                 setUsers(users);
             })
@@ -40,24 +35,21 @@ function Chat(props)
                 setUsers(users);
             })
             socket.on("server-left",(message)=>{
-                displayMessage(message,"",true);
+                displayMessage(message,"",false,true);
+                setUsers(users);
             })
         })
 
         return ()=>{
-            // socket.disconnect();
-            // socket.on("disconnect",()=>{
-            //     socket.emit("leave-room",props.roomId,props.name);
-            // })
             socket.off("connect");
         }
     },[])
 
-    function displayMessage(message,name,isJoined)
+    function displayMessage(message,name,isJoined,isLeft)
     {
         const date=new Date();
         const time=date.getHours().toString().concat(":",String(date.getMinutes()).padStart(2,"0"))
-        setChats(prevChats=>[...prevChats,{message:message,name:name,client:false,time:time,isJoined:isJoined}])
+        setChats(prevChats=>[...prevChats,{message:message,name:name,client:false,time:time,isJoined:isJoined,isLeft:isLeft}])
     }
 
     function sendMessage()
@@ -80,8 +72,8 @@ function Chat(props)
 
     function leaveRoom()
     {
-        socket.emit("leave-room",props.uid,props.name)
-        socket.disconnect();
+        socket.emit("leave-room",props.roomId,props.uid,props.name)
+        props.leaveRoom();
     }
 
     function handleChange(e)
@@ -103,7 +95,6 @@ function Chat(props)
     return(
         <div>
             <Header />
-            {/* <Spinner /> */}
             <div id="chat-div" className="container border bg-white justify-between d-flex flex-row">
 
                 <div name="left" className="container d-flex flex-column justify-content-between border border-top-0 my-2 p-0">
@@ -147,6 +138,11 @@ function Chat(props)
                                         <div className="rounded container bg-success p-1 px-2 pb-0 mb-2 w-auto">
                                             <p className="h6 fw-normal text-white">{chat.message}</p>
                                         </div>
+                                )
+                                else if(chat.isLeft) return(
+                                    <div className="rounded container bg-danger p-1 px-2 pb-0 mb-2 w-auto">
+                                        <p className="h6 fw-normal text-white">{chat.message}</p>
+                                    </div>
                                 )
                                 else return (
                                     <div className="d-flex flex-column container p-0 align-items-start justify-content-between w-100">

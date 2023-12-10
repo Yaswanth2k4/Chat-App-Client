@@ -1,11 +1,10 @@
 import React,{useState} from "react";
 import Header from "./Header";
 import "./Home.css"
-import { doLogout, getCurrentUser } from "../auth";
 import Chat from "./Chat";
 import { socket } from "../socket";
 
-function Home()
+function Home(props)
 {
     const [roomId,setRoomId]=useState("");
     const [message,setMessage]=useState("")
@@ -36,25 +35,30 @@ function Home()
         socket.connect();
     }
 
+    function leaveRoom()
+    {
+        setJoined(false);
+    }
+
     return !joinedRoom?(
         <div>
             <Header></Header>
             <div id="home-div" className="container rounded rounded-5 border text-center bg-white">
-                <h4 className="h3 my-4">Hello {getCurrentUser().name}! </h4>
+                <h4 className="h3 my-4">Hello {props.name}! </h4>
                 <button className="btn btn-primary" onClick={handleCreateRoom}>Create a new Room</button>
                 <form className="mx-5 d-flex flex-column align-items-center" onSubmit={e=>e.preventDefault()}>
                     <label className="my-4 h4">Join a Room</label>
                     <input id="room-input" type="text" name="roomId" onFocus={()=>setMessage("")} onChange={handleChange} className="form-control mb-4" placeholder="Enter Room ID"></input>
                     <input type="submit" onClick={handleJoinRoom} className="btn btn-success mb-4" value="Join Room"/>
                 </form>
-                <button type="submit" className="btn btn-danger mb-4" onClick={()=>{doLogout()}}>Logout</button>
-                <p className="p text-danger">{message}</p>
+                <button type="button" className="btn btn-danger mb-4" onClick={()=>{props.logout()}}>Logout</button>
             </div>
         </div>
     ):<Chat 
         roomId={roomId.val}
-        uid={getCurrentUser().id}
-        name={getCurrentUser().name}
+        uid={props.uid}
+        name={props.name}
+        leaveRoom={leaveRoom}
         />
 }
 
