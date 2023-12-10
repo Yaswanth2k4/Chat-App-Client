@@ -43,6 +43,7 @@ function Home(props)
     {
         setJoined(false);
         setRoomId("");
+        setMessage("");
     }
 
     return !joinedRoom?(
