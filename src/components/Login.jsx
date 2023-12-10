@@ -3,6 +3,7 @@ import "./Login.css"
 import axios from "axios";
 import Header from "./Header";
 import Home from "./Home.jsx";
+import { doLogin, doLogout, getCurrentUser, isLoggedIn } from "../auth/index.js";
 
 function Login()
 {
@@ -17,9 +18,8 @@ function Login()
         Password:""
     })
     const [visibility,setVisible]=useState("hidden")
-    const [name,setName]=useState("");
-    const [uid,setUid]=useState("");
-    const [isLoggedIn,setLoggedIn]=useState(false);
+    const [loggedIn,setLoggedIn]=useState(isLoggedIn());
+
     function handleChange(e)
     {
         setMessage("")
@@ -54,12 +54,11 @@ function Login()
             setVisible("visible")
             axios.post(`${process.env.REACT_APP_API}/login`,{email:input.Email,password:input.Password})
             .then(res=>res.data).then(data=>{
+                doLogin(data.id,data.name);
+                setLoggedIn(true);
                 setVisible("hidden")
                 setMessage(data.message)
                 setSuccess(true)
-                setName(data.name);
-                setUid(data.id)
-                setLoggedIn(true);
                 setInput({
                     Name:"",
                     Email:"",
@@ -90,10 +89,11 @@ function Login()
 
     function logout()
     {
-        setLoggedIn(false)
+        doLogout();
+        setLoggedIn(isLoggedIn());
     }
 
-    return !isLoggedIn?(
+    return !loggedIn?(
     <div className="d-flex flex-column align-items-center">
         <Header></Header>
         <div className="spinner-border text-primary" style={{visibility:visibility}}>
@@ -115,8 +115,8 @@ function Login()
         </div>
     </div>):<Home 
                 logout={logout}
-                name={name}
-                uid={uid}
+                name={getCurrentUser().name}
+                uid={getCurrentUser().id}
             />
 }
 

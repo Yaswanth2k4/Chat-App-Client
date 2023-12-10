@@ -3,6 +3,7 @@ import Header from "./Header";
 import "./Home.css"
 import Chat from "./Chat";
 import { socket } from "../socket";
+import { doLogout, getCurrentUser } from "../auth";
 
 function Home(props)
 {
@@ -13,9 +14,7 @@ function Home(props)
     function handleCreateRoom()
     {
         var id=Math.floor(Math.random()*(9999999999-1000000000)+1000000000).toString(36)
-        setRoomId({
-            val:id
-        });
+        setRoomId(id);
         setJoined(true);
         socket.connect();
     }
@@ -23,21 +22,27 @@ function Home(props)
     function handleChange(e)
     {
         const {value}=e.target;
-        setRoomId(prev=>{
-            return {...prev,val:value}
-        })
+        setRoomId(value)
     }
 
     function handleJoinRoom()
     {
-        setMessage(roomId.val);
-        setJoined(true);
-        socket.connect();
+        if(roomId!=="")
+        {
+            setMessage(roomId);
+            setJoined(true);
+            socket.connect();
+        }
+        else
+        {
+            setMessage("Room Id can't be empty")
+        }
     }
 
     function leaveRoom()
     {
         setJoined(false);
+        setRoomId("");
     }
 
     return !joinedRoom?(
@@ -52,10 +57,11 @@ function Home(props)
                     <input type="submit" onClick={handleJoinRoom} className="btn btn-success mb-4" value="Join Room"/>
                 </form>
                 <button type="button" className="btn btn-danger mb-4" onClick={()=>{props.logout()}}>Logout</button>
+                <p className="p text-danger">{message}</p>
             </div>
         </div>
     ):<Chat 
-        roomId={roomId.val}
+        roomId={roomId}
         uid={props.uid}
         name={props.name}
         leaveRoom={leaveRoom}
