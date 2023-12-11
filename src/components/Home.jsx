@@ -3,7 +3,6 @@ import Header from "./Header";
 import "./Home.css"
 import Chat from "./Chat";
 import { socket } from "../socket";
-import { doLogout, getCurrentUser } from "../auth";
 
 function Home(props)
 {

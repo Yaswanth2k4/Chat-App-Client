@@ -1,4 +1,4 @@
-import React ,{useEffect, useState} from "react";
+import React ,{useEffect, useState, useRef} from "react";
 import "./Chat.css";
 import Header from "./Header";
 import { IoSend } from "react-icons/io5";
@@ -13,6 +13,7 @@ function Chat(props)
     const [input,setInput]=useState("");
     const [chats,setChats]=useState([]);
     const [users,setUsers]=useState([]);
+    const chatContainerRef=useRef();
 
     useEffect(()=>{
         socket.on("connect",()=>{
@@ -44,6 +45,10 @@ function Chat(props)
             socket.off("connect");
         }
     },[])
+
+    useEffect(()=>{
+        chatContainerRef.current.scrollTop=chatContainerRef.current.scrollHeight;
+    },[chats])
 
     function displayMessage(message,name,isJoined,isLeft)
     {
@@ -123,7 +128,7 @@ function Chat(props)
                             <IconButton icon={<SlLogout />} onClick={leaveRoom} className="h6 pt-0 pb-1 ps-1 ps-0 bg-primary border border-white rounded-2 text-white"> </IconButton>
                     </div>
 
-                    <div className="container d-flex flex-column h-100 w-100 pt-2" style={{overflowY:"scroll",backgroundColor:"#f2f2f2"}}>
+                    <div ref={chatContainerRef} className="container d-flex flex-column h-100 w-100 pt-2" style={{overflowY:"scroll",backgroundColor:"#f2f2f2"}}>
                         {
                             chats.map((chat)=>{
                                 if(chat.client) return(
