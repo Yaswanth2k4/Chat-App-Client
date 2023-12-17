@@ -17,7 +17,7 @@
     }
 }
 
-@media (min-height:720px) and (max-height:825px) {
+@media (min-height:720px) and (max-height:750px) {
     #home-div{
         height: 54vh;
     }
