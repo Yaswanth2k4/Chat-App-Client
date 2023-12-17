@@ -67,6 +67,7 @@ function Login()
                 setMessage("")
             })
             .catch(function(err){
+                setVisible("hidden")
                 setMessage(err.response.data.message)
                 setSuccess(false)
             })
@@ -74,16 +75,21 @@ function Login()
         else if(e.target.name==="Signup")
         {
             if(input.Email!=="" && input.Name!=="" && input.Password!=="")
-            axios.post(`${process.env.REACT_APP_API}/register`,{name:input.Name,email:input.Email,password:input.Password})
-            .then(res=>res.data).then(data=>{
-                setMessage(data.message)
-                setSuccess(true)
-                loginClick()
-            })
-            .catch(function(err){
-                setMessage(err.response.data.message)
-                setSuccess(false)
-            })
+            {
+                setVisible("visible")
+                axios.post(`${process.env.REACT_APP_API}/register`,{name:input.Name,email:input.Email,password:input.Password})
+                .then(res=>res.data).then(data=>{
+                    setVisible("hidden")
+                    setMessage(data.message)
+                    setSuccess(true)
+                    loginClick()
+                })
+                .catch(function(err){
+                    setVisible("hidden")
+                    setMessage(err.response.data.message)
+                    setSuccess(false)
+                })
+            }
         }
     }
 
