@@ -110,7 +110,7 @@ function Login()
                 <input type="password" name="Password" value={input.Password} onFocus={()=>setMessage("")} onChange={handleChange} className="form-control mb-4" placeholder="Password" required></input>
                 <input type="submit" name={submitBtn} className="btn btn-primary w-50 mb-4 py-2" onClick={handleSubmitClick} value={submitBtn} />
             </form>
-            {isLogin && <button className="btn border-0 w-50 align-self-center" onClick={signupClick}>New User? <span className="text-primary">Signup</span></button>}
+            {isLogin && <button className="btn border-0 align-self-center" style={{width:"75%"}} onClick={signupClick}>New User? <span className="text-primary">Signup</span></button>}
             <p className={isSuccess?"text-success align-self-center":"text-danger align-self-center"}>{message}</p>
         </div>
     </div>):<Home 
