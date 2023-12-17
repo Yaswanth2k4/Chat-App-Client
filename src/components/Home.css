@@ -11,9 +11,20 @@
 @media (min-width:1px) and (max-width:1000px) {
     #home-div{
         width: 90vw;
-        height: 50vh;
     }
     #room-input{
         width:90%;
+    }
+}
+
+@media (min-height:720px) and (max-height:825px) {
+    #home-div{
+        height: 54vh;
+    }
+}
+
+@media (max-height:719px) {
+    #home-div{
+        height: 60vh;
     }
 }

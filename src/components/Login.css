@@ -1,12 +1,16 @@
 #main-div{
-    width: 25vw;
     height: 50vh;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-@media (min-width:200px) and (max-width:1000px) {
+@media (min-height:720px) and (max-height:825px) {
     #main-div{
-        width: 90vw;
-        height: 50vh;
+        height: 54vh;
+    }
+}
+
+@media (max-height:719px) {
+    #main-div{
+        height: 60vh;
     }
 }

@@ -98,7 +98,7 @@ function Login()
         <Header></Header>
         <div className="spinner-border text-primary" style={{visibility:visibility}}>
         </div>
-        <div id="main-div" className="container rounded rounded-5 d-flex flex-column mt-5 text-center bg-white">
+        <div id="main-div" className="container col-10 col-sm-8 col-lg-3 rounded rounded-5 d-flex flex-column mt-5 text-center bg-white">
             <h4 className="h4 mt-4">{submitBtn}</h4>
             <div className="border-0 btn-group mx-5 mt-3 mb-4" role="group">
                 <button type="button" className={isLogin?"btn btn-primary text-center active py-2":"btn btn-primary text-center py-2"} onClick={loginClick}>Login</button>
