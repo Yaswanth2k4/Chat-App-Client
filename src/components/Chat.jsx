@@ -133,7 +133,7 @@ function Chat(props)
                             chats.map((chat)=>{
                                 if(chat.client) return(
                                     <div className="d-flex flex-column container p-0 align-items-end justify-content-between w-100">
-                                        <div className="sent p-1 px-2 pb-0 bg-primary w-auto" style={{maxWidth:"45%"}}>
+                                        <div className="sent p-1 px-2 pb-0 bg-primary w-auto" style={{maxWidth:"80%"}}>
                                             <p className="h6 p-0 fw-normal text-white">{chat.message}</p>
                                         </div>
                                         <p style={{fontSize:"12px"}}>{chat.time}</p>
@@ -151,7 +151,7 @@ function Chat(props)
                                 )
                                 else return (
                                     <div className="d-flex flex-column container p-0 align-items-start justify-content-between w-100">
-                                        <div className="receive d-flex flex-column justify-content-center p-1 px-2 pb-0 border bg-white w-auto" style={{maxWidth:"45%"}}>
+                                        <div className="receive d-flex flex-column justify-content-center p-1 px-2 pb-0 border bg-white w-auto" style={{maxWidth:"80%"}}>
                                             <p className="fw-semibold p-0 m-0 text-primary" style={{fontSize:"13px"}}>{chat.name}</p>
                                             <h6 className="h6 fw-normal text-black">{chat.message}</h6>
                                         </div>
