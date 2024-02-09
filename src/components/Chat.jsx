@@ -11,30 +11,45 @@ import {socket} from "../socket"
 function Chat(props)
 {
     const [input,setInput]=useState("");
+    const [spinner,setSpinner]=useState(false)
+    const [prevChats,setPrevChats]=useState([]);
     const [chats,setChats]=useState([]);
     const [users,setUsers]=useState([]);
     const chatContainerRef=useRef();
-
+    
     useEffect(()=>{
         socket.on("connect",()=>{
             console.log(`Connected with socket id ${socket.id}`)
-            socket.emit("join-room",props.roomId,props.name,props.uid,(message)=>{
-                displayMessage(message,"",true,false);
-                console.log(message);
+
+            setSpinner("true")
+
+            axios.post(`${process.env.REACT_APP_API}/chats/join-room/${props.roomId}/${props.uid}`, { name:props.name })
+            .then(res=>res.data)
+            .then(data=>{
+                setPrevChats(data.prevChats);
+
+                setSpinner(false)
+
+                socket.emit("join-room",props.roomId,props.name,props.uid,(message)=>{
+                    displayMessage(message,"",true,false);
+                });
             });
+
             socket.on("server-message",(message,name)=>{
                 displayMessage(message,name,false,false);
-                console.log(message)
             });
+
             socket.on("server-joined",(message,users)=>{
                 displayMessage(message,"",true,false);
                 users=users.filter(user=>user.uid!==props.uid)
                 setUsers(users);
             })
+
             socket.on("users",(users)=>{
                 users=users.filter(user=>user.uid!==props.uid);
                 setUsers(users);
             })
+
             socket.on("server-left",(message)=>{
                 displayMessage(message,"",false,true);
                 setUsers(users);
@@ -66,18 +81,27 @@ function Chat(props)
 
             const date=new Date();
             const time=date.getHours().toString().concat(":",String(date.getMinutes()).padStart(2,"0"))
+
             setChats(prevChats=>[...prevChats,{message:text,client:true,time:time,isJoined:false}])
 
             socket.emit("client-message",text,props.name,props.roomId);
-
-            axios.post(`${process.env.REACT_APP_API}/chats/addchat/${props.uid}`,{message:text,client:true})
-            .then(res=>res.data)
         }
     }
 
     function leaveRoom()
     {
         socket.emit("leave-room",props.roomId,props.uid,props.name)
+
+        if(users.length==0)
+        {
+            //deleting the room details from the database
+            axios.delete(`${process.env.REACT_APP_API}/chats/delete-room/${props.roomId}`)
+        }
+        else
+        {
+            //saving chats of this room in the database
+            axios.post(`${process.env.REACT_APP_API}/chats/save-chats/${props.roomId}/${props.uid}`, { name:props.name, chats:chats })
+        }
         props.leaveRoom();
     }
 
@@ -129,6 +153,44 @@ function Chat(props)
                     </div>
 
                     <div ref={chatContainerRef} className="container d-flex flex-column h-100 w-100 pt-2" style={{overflowY:"scroll",backgroundColor:"#f2f2f2"}}>
+                        
+                        {/* spinner */}
+
+                        { spinner && <div className="rounded container bg-success p-1 px-2 pb-0 mb-2 w-auto">
+                                            <p className="h6 fw-normal text-white">Loading chats..... </p>
+                                        </div> }
+                        
+                        {
+                            prevChats.map((chat)=>{
+                                if(chat.client) return(
+                                    <div className="d-flex flex-column container p-0 align-items-end justify-content-between w-100">
+                                        <div className="sent p-1 px-2 pb-0 bg-primary w-auto" style={{maxWidth:"80%"}}>
+                                            <p className="h6 p-0 fw-normal text-white">{chat.message}</p>
+                                        </div>
+                                        <p style={{fontSize:"12px"}}>{chat.time}</p>
+                                    </div>
+                                )
+                                else if(chat.isJoined) return(
+                                        <div className="rounded container bg-success p-1 px-2 pb-0 mb-2 w-auto">
+                                            <p className="h6 fw-normal text-white">{chat.message}</p>
+                                        </div>
+                                )
+                                else if(chat.isLeft) return(
+                                    <div className="rounded container bg-danger p-1 px-2 pb-0 mb-2 w-auto">
+                                        <p className="h6 fw-normal text-white">{chat.message}</p>
+                                    </div>
+                                )
+                                else return (
+                                    <div className="d-flex flex-column container p-0 align-items-start justify-content-between w-100">
+                                        <div className="receive d-flex flex-column justify-content-center p-1 px-2 pb-0 border bg-white w-auto" style={{maxWidth:"80%"}}>
+                                            <p className="fw-semibold p-0 m-0 text-primary" style={{fontSize:"13px"}}>{chat.name}</p>
+                                            <h6 className="h6 fw-normal text-black">{chat.message}</h6>
+                                        </div>
+                                        <p style={{fontSize:"12px"}}>{chat.time}</p>
+                                    </div>
+                                )
+                            })
+                        }
                         {
                             chats.map((chat)=>{
                                 if(chat.client) return(
